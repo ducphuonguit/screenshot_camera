@@ -1,5 +1,6 @@
+// javascript
 import React, { useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView, findNodeHandle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as MediaLibrary from 'expo-media-library';
 import { captureRef } from 'react-native-view-shot';
@@ -17,7 +18,7 @@ export default function ScreenshotScreen({ navigation }) {
 			<SafeAreaView style={styles.container}>
 				<View style={styles.permissionContainer}>
 					<Text style={styles.permissionText}>We need media library permission to save screenshots</Text>
-					<TouchableOpacity style={styles.button} onPress={requestMediaPermission}>
+					<TouchableOpacity style={styles.button} onPress={() => requestMediaPermission()}>
 						<Text style={styles.buttonText}>Grant Permission</Text>
 					</TouchableOpacity>
 				</View>
@@ -27,14 +28,27 @@ export default function ScreenshotScreen({ navigation }) {
 
 	const takeScreenshot = async () => {
 		try {
-			const uri = await captureRef(screenshotRef, {
+			// get native handle (ensures view exists on native side)
+			const node = findNodeHandle(screenshotRef.current) || screenshotRef.current;
+			if (!node) throw new Error('No native node available to capture');
+
+			const uri = await captureRef(node, {
 				format: 'png',
 				quality: 1,
+				result: 'tmpfile',
 			});
-			await MediaLibrary.saveToLibraryAsync(uri);
+
+			const asset = await MediaLibrary.createAssetAsync(uri);
+			try {
+				await MediaLibrary.createAlbumAsync('Screenshots', asset, false);
+			} catch (e) {
+				// ignore album exists error
+			}
+
 			Alert.alert('Success', 'Screenshot saved to gallery!');
 		} catch (error) {
-			Alert.alert('Error', 'Failed to take screenshot');
+			console.error('takeScreenshot error:', error);
+			Alert.alert('Error', `Failed to take screenshot: ${error?.message || error}`);
 		}
 	};
 
@@ -48,8 +62,9 @@ export default function ScreenshotScreen({ navigation }) {
 				<View style={styles.backButton} />
 			</View>
 
-			<ScrollView style={styles.content}>
-				<View ref={screenshotRef} style={styles.screenshotArea}>
+			<ScrollView style={styles.content} contentContainerStyle={{ flexGrow: 1 }}>
+				{/* Make sure the view is not collapsed/optimized away on native side */}
+				<View ref={screenshotRef} collapsable={false} style={styles.screenshotArea}>
 					<View style={styles.card}>
 						<Text style={styles.cardTitle}>📱 Screenshot Demo</Text>
 						<Text style={styles.cardText}>

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "routing",
-    "slug": "routing",
+    "name": "screenshot_camera",
+    "slug": "screenshot_camera",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,10 +20,16 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "screenshot.camrea"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "10ac567e-de34-48bc-9790-344ab99d86df"
+      }
     }
   }
 }
