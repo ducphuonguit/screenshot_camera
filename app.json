@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "screenshot_camera",
-    "slug": "screenshot_camera",
+    "name": "routing",
+    "slug": "routing",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
